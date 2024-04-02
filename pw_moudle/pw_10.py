@@ -1,4 +1,5 @@
 from playwright.sync_api import sync_playwright
+import pandas as pd
 from lxml import etree
 
 search = input("请输入你想搜索的内容：")
@@ -38,10 +39,19 @@ with sync_playwright() as p:
     # 数据解析
     tree = etree.HTML(page_text)
     div_list = tree.xpath('//*[@id="i_cecream"]/div/div[2]/div[2]/div/div/div/div[3]/div/div')
+    # 1. 创建数据表格
+    table = pd.DataFrame(columns=['title','author'])
+    index = 0
     for div in div_list:
         title = div.xpath('.//h3[@class="bili-video-card__info--tit"]/@title')[0]
         author = div.xpath('.//span[@class="bili-video-card__info--author"]/text()')[0]
-        print(title,author)
+        # print(title,author)
+        # 2. 数据表格插入数据
+        table.loc[index] = [title,author]
+        index += 1
+    # 3.将数据表格转化成 Excel
+    table.to_excel('bilbil_search.xlsx')
+
 
     page.close()
     context.close()
